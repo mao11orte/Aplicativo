@@ -5,7 +5,7 @@ import plotly.express as px
 import matplotlib.pyplot as plt
 import json
 from groq import Groq
-from streamlit_folium import st_folium #Widget de Streamlit para mostrar los mapas
+#from streamlit_folium import st_folium #Widget de Streamlit para mostrar los mapas
 from folium.plugins import MarkerCluster #Plugin para agrupar marcadores
 from folium import Choropleth, GeoJson
 from shapely.geometry import MultiPolygon, Polygon
@@ -30,11 +30,11 @@ import base64
 
 def generar_informes(selected_municipio):
     #importamos los archivos
-    mapa_base = gpd.read_file('DatosU\DatosU\mapa_quindio\mapa_quindio.shp')
-    evas_quindio = pd.read_excel('DatosU\DatosU\EVAS_Quindio.xlsx')
-    ipm_quindio = pd.read_excel('DatosU\DatosU\IPM_Quindio.xlsx')
-    general_quindio = pd.read_excel('DatosU\DatosU\datos_quindio_generales.xlsx')
-    socioeconomico_quindio = pd.read_excel('DatosU\DatosU\Socioeconomico_Quindio.xlsx')
+    mapa_base = gpd.read_file('DatosU/DatosU/mapa_quindio/mapa_quindio.shp')
+    evas_quindio = pd.read_excel('DatosU/DatosU/EVAS_Quindio.xlsx')
+    ipm_quindio = pd.read_excel('DatosU/DatosU/IPM_Quindio.xlsx')
+    general_quindio = pd.read_excel('DatosU/DatosU/datos_quindio_generales.xlsx')
+    socioeconomico_quindio = pd.read_excel('DatosU/DatosU/Socioeconomico_Quindio.xlsx')
 
     #Seleccionamos el municipio
     municipio_seleccionado = str(selected_municipio)
@@ -531,8 +531,8 @@ dfmapq = gpd.read_file(dfQuindio)
 dfmapQ = gpd.read_file(dfQuindio)
 dfGeneral = "DataBase/datos_quindio_generales.xlsx"
 dfGeneral = pd.read_excel(dfGeneral)
-precio_tierra = gpd.read_file('DatosU\DatosU\precio_tierra_quindio/precio_tierra_quindio.shp')
-calidad_tierra = gpd.read_file('DatosU\DatosU\calidad_tierra_quindio/calidad_tierra_quindio.shp')
+precio_tierra = gpd.read_file('DatosU/DatosU/precio_tierra_quindio/precio_tierra_quindio.shp')
+calidad_tierra = gpd.read_file('DatosU/DatosU/calidad_tierra_quindio/calidad_tierra_quindio.shp')
 
 
 # Asegurarse de que las geometrías sean de tipo MultiPolygon o Polygon
@@ -948,10 +948,10 @@ with tab5:
 
         # Categorías y archivos
         categories = {
-            "Cultivos": "DatosU\DatosU\EVAS_Quindio.xlsx",
-            "Población Vulnerable": "DatosU\DatosU\IPM_Quindio.xlsx",
-            "Datos socioeconómicos": "DatosU\DatosU\Socioeconomico_Quindio.xlsx",
-            "Información general": "DatosU\DatosU\datos_quindio_generales.xlsx"
+            "Cultivos": "DatosU/DatosU/EVAS_Quindio.xlsx",
+            "Población Vulnerable": "DatosU/DatosU/IPM_Quindio.xlsx",
+            "Datos socioeconómicos": "DatosU/DatosU/Socioeconomico_Quindio.xlsx",
+            "Información general": "DatosU/DatosU/datos_quindio_generales.xlsx"
         }
 
         # Selector de categoría
