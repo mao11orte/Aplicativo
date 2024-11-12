@@ -491,7 +491,7 @@ def generar_informes(selected_municipio):
 
 st.set_page_config(
     page_title="Departamento del Quindío",
-    page_icon="🌐",  
+    page_icon="DatosU/icono.png",  
     layout='wide',
     initial_sidebar_state="expanded"
 )
