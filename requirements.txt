@@ -7,3 +7,4 @@ shapely
 numpy
 nltk
 python-docx
+Groq
