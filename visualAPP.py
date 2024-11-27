@@ -25,6 +25,7 @@ import base64
 import os
 import plotly.express as px
 from plotly.subplots import make_subplots
+from io import BytesIO
 
 def generar_informes(selected_municipio):
     #importamos los archivos
@@ -485,7 +486,12 @@ def generar_informes(selected_municipio):
     add_paragraph(doc, f'{municipio_seleccionado} tiene un IPM de {ipm_municipal}, sin embargo, al territorializarlo se identifica que la situación es más difícil en el sector rural con un IPM de {IPM_Rural} en comparación con el IPM urbano que es de {IPM_Urbano}. La gráfica 5 muestra los niveles de IPM, por sector en {municipio_seleccionado}:')
     doc.add_picture('grafico5.png', width=Inches(6.5))
     add_paragraph(doc, f'La principal problemática que impacta a una mayor proporción de la población en términos de pobreza multidimensional del municipio es el trabajo informal, a nivel municipal es de {trabajo_informal_municipio}, en el sector rural es de {trabajo_informal_rural} y en el sector urbano es de {trabajo_informal_urbano}.')
-    doc.save(f'{municipio_seleccionado}.docx')
+    # Guardar el archivo en un objeto de memoria
+    buffer = BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)  # Regresar al inicio del archivo en memoria
+
+    return buffer, f"{selected_municipio}.docx"
 
 st.set_page_config(
     page_title="Departamento del Quindío",
@@ -577,14 +583,15 @@ with tab2:
         st.write("")  # Espacio en blanco para alineación vertical
         if st.button("Generar informe"):            
             st.write(f"Has seleccionado el municipio de {selected_municipio}")
-            file_path = generar_informes(selected_municipio)
-            with open(file_path, "rb") as f:
-                st.download_button(
-                    label="Descargar informe",
-                    data=f,
-                    file_name=file_path,
-                    mime="text/plain"
-                )
+            buffer, file_name = generar_informes(selected_municipio)
+            
+            # Botón para descargar el archivo
+            st.download_button(
+                label="Descargar Informe",
+                data=buffer,
+                file_name=file_name,
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
 # Crear el gráfico de Plotly con los centroides
 with tab3: 
     dfmapq['LATITUD'] = dfmapq.geometry.centroid.y  # Extraer la latitud de los centroides
