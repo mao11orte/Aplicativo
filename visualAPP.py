@@ -1226,7 +1226,8 @@ El modelo puede ser consultado a través del Jupyter Notebook denominado “mode
     
 with tab1:
     # Descargar los recursos necesarios de NLTK si no los tienes
-    nltk.download('punkt')
+    # nltk.download('punkt')
+    nltk.download('punkt', quiet=True)
 
     # Inicializar el cliente de Groq
     with open('config.json') as config_file:
