@@ -8,3 +8,4 @@ numpy
 nltk
 python-docx
 Groq
+openpyxl
