@@ -27,11 +27,11 @@ from plotly.subplots import make_subplots
 
 def generar_informes(selected_municipio):
     #importamos los archivos
-    mapa_base = gpd.read_file('DatosU\DatosU\mapa_quindio\mapa_quindio.shp')
-    evas_quindio = pd.read_excel('DatosU\DatosU\EVAS_Quindio.xlsx')
-    ipm_quindio = pd.read_excel('DatosU\DatosU\IPM_Quindio.xlsx')
-    general_quindio = pd.read_excel('DatosU\DatosU\datos_quindio_generales.xlsx')
-    socioeconomico_quindio = pd.read_excel('DatosU\DatosU\Socioeconomico_Quindio.xlsx')
+    mapa_base = gpd.read_file('DatosU/DatosU/mapa_quindio/mapa_quindio.shp')
+    evas_quindio = pd.read_excel('DatosU/DatosU/EVAS_Quindio.xlsx')
+    ipm_quindio = pd.read_excel('DatosU/DatosU/IPM_Quindio.xlsx')
+    general_quindio = pd.read_excel('DatosU/DatosU/datos_quindio_generales.xlsx')
+    socioeconomico_quindio = pd.read_excel('DatosU/DatosU/Socioeconomico_Quindio.xlsx')
 
     #Seleccionamos el municipio
     municipio_seleccionado = str(selected_municipio)
