@@ -1093,7 +1093,7 @@ with tab5:
 
     with tab7:
         # Cargar los datos desde el archivo Excel
-        socioeconomico_quindio = pd.read_excel('DatosU\DatosU\Socioeconomico_Quindio.xlsx')
+        socioeconomico_quindio = pd.read_excel('DatosU/DatosU/Socioeconomico_Quindio.xlsx')
 
         # Filtrar los datos para el año 2018 y seleccionar las columnas deseadas
         datos_2018 = socioeconomico_quindio[socioeconomico_quindio['Año'] == 2018][['Municipio', 'Población Urbana', 'Población Rural']]
