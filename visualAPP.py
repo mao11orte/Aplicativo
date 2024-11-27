@@ -1293,10 +1293,10 @@ with tab1:
 
         # Categorías y archivos
         categories = {
-            "Cultivos": "DatosU\DatosU\EVAS_Quindio.xlsx",
-            "Población Vulnerable": "DatosU\DatosU\IPM_Quindio.xlsx",
-            "Datos socioeconómicos": "DatosU\DatosU\Socioeconomico_Quindio.xlsx",
-            "Información general": "DatosU\DatosU\datos_quindio_generales.xlsx"
+            "Cultivos": "DatosU/DatosU/EVAS_Quindio.xlsx",
+            "Población Vulnerable": "DatosU/DatosU/IPM_Quindio.xlsx",
+            "Datos socioeconómicos": "DatosU/DatosU/Socioeconomico_Quindio.xlsx",
+            "Información general": "DatosU/DatosU/datos_quindio_generales.xlsx"
         }
 
         # Selector de categoría
