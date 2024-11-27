@@ -22,18 +22,17 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 import base64
-import os
 import plotly.express as px
 from plotly.subplots import make_subplots
 from io import BytesIO
 
 def generar_informes(selected_municipio):
     #importamos los archivos
-    mapa_base = gpd.read_file('DatosU/DatosU/mapa_quindio/mapa_quindio.shp')
-    evas_quindio = pd.read_excel('DatosU/DatosU/EVAS_Quindio.xlsx')
-    ipm_quindio = pd.read_excel('DatosU/DatosU/IPM_Quindio.xlsx')
-    general_quindio = pd.read_excel('DatosU/DatosU/datos_quindio_generales.xlsx')
-    socioeconomico_quindio = pd.read_excel('DatosU/DatosU/Socioeconomico_Quindio.xlsx')
+    mapa_base = gpd.read_file('DatosU\DatosU\mapa_quindio\mapa_quindio.shp')
+    evas_quindio = pd.read_excel('DatosU\DatosU\EVAS_Quindio.xlsx')
+    ipm_quindio = pd.read_excel('DatosU\DatosU\IPM_Quindio.xlsx')
+    general_quindio = pd.read_excel('DatosU\DatosU\datos_quindio_generales.xlsx')
+    socioeconomico_quindio = pd.read_excel('DatosU\DatosU\Socioeconomico_Quindio.xlsx')
 
     #Seleccionamos el municipio
     municipio_seleccionado = str(selected_municipio)
@@ -114,9 +113,6 @@ def generar_informes(selected_municipio):
 
     poblacion_urbana = dato_población_quindio['Población Urbana'].values[0]
     porcentaje_poblacion_urbana = round(poblacion_urbana / poblacion_total *100, 2)
-
-    #Gráfico
-
 
     #Crear la figura y los ejes
     plt.figure(figsize=(10, 5))
@@ -486,12 +482,15 @@ def generar_informes(selected_municipio):
     add_paragraph(doc, f'{municipio_seleccionado} tiene un IPM de {ipm_municipal}, sin embargo, al territorializarlo se identifica que la situación es más difícil en el sector rural con un IPM de {IPM_Rural} en comparación con el IPM urbano que es de {IPM_Urbano}. La gráfica 5 muestra los niveles de IPM, por sector en {municipio_seleccionado}:')
     doc.add_picture('grafico5.png', width=Inches(6.5))
     add_paragraph(doc, f'La principal problemática que impacta a una mayor proporción de la población en términos de pobreza multidimensional del municipio es el trabajo informal, a nivel municipal es de {trabajo_informal_municipio}, en el sector rural es de {trabajo_informal_rural} y en el sector urbano es de {trabajo_informal_urbano}.')
+    # doc.save(f'{municipio_seleccionado}.docx')
+    
     # Guardar el archivo en un objeto de memoria
     buffer = BytesIO()
     doc.save(buffer)
     buffer.seek(0)  # Regresar al inicio del archivo en memoria
 
     return buffer, f"{selected_municipio}.docx"
+
 
 st.set_page_config(
     page_title="Departamento del Quindío",
@@ -535,10 +534,8 @@ dfmapq = gpd.read_file(dfQuindio)
 dfmapQ = gpd.read_file(dfQuindio)
 dfGeneral = "DataBase/datos_quindio_generales.xlsx"
 dfGeneral = pd.read_excel(dfGeneral)
-
-precio_tierra = gpd.read_file('DatosU/DatosU/precio_tierra_quindio/precio_tierra_quindio.shp')
-
-calidad_tierra = gpd.read_file('DatosU/DatosU/calidad_tierra_quindio/calidad_tierra_quindio.shp')
+precio_tierra = gpd.read_file('DatosU\DatosU\precio_tierra_quindio/precio_tierra_quindio.shp')
+calidad_tierra = gpd.read_file('DatosU\DatosU\calidad_tierra_quindio/calidad_tierra_quindio.shp')
 
 
 # Asegurarse de que las geometrías sean de tipo MultiPolygon o Polygon
@@ -567,6 +564,7 @@ with tab2:
 
     # Mostrar el mapa en Streamlit
     st.plotly_chart(fig, use_container_width=True)
+    
     municipios = [
     'Armenia', 'Buenavista', 'Calarcá', 'Circasia', 'Córdoba', 'Filandia',
     'Génova', 'La Tebaida', 'Montenegro', 'Pijao', 'Quimbaya', 'Salento'
@@ -1108,7 +1106,7 @@ with tab5:
 
     with tab7:
         # Cargar los datos desde el archivo Excel
-        socioeconomico_quindio = pd.read_excel('DatosU/DatosU/Socioeconomico_Quindio.xlsx')
+        socioeconomico_quindio = pd.read_excel('DatosU\DatosU\Socioeconomico_Quindio.xlsx')
 
         # Filtrar los datos para el año 2018 y seleccionar las columnas deseadas
         datos_2018 = socioeconomico_quindio[socioeconomico_quindio['Año'] == 2018][['Municipio', 'Población Urbana', 'Población Rural']]
@@ -1308,10 +1306,10 @@ with tab1:
 
         # Categorías y archivos
         categories = {
-            "Cultivos": "DatosU/DatosU/EVAS_Quindio.xlsx",
-            "Población Vulnerable": "DatosU/DatosU/IPM_Quindio.xlsx",
-            "Datos socioeconómicos": "DatosU/DatosU/Socioeconomico_Quindio.xlsx",
-            "Información general": "DatosU/DatosU/datos_quindio_generales.xlsx"
+            "Cultivos": "DatosU\DatosU\EVAS_Quindio.xlsx",
+            "Población Vulnerable": "DatosU\DatosU\IPM_Quindio.xlsx",
+            "Datos socioeconómicos": "DatosU\DatosU\Socioeconomico_Quindio.xlsx",
+            "Información general": "DatosU\DatosU\datos_quindio_generales.xlsx"
         }
 
         # Selector de categoría
@@ -1423,3 +1421,5 @@ with tab10:  # "tab10"
 
 
 # streamlit run e:/Datos_U/visualAPP.py este es el comando para iniciar el aplicativo
+#  pip install -r requirements.txt
+
