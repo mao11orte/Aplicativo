@@ -531,7 +531,7 @@ dfGeneral = pd.read_excel(dfGeneral)
 
 precio_tierra = gpd.read_file('DatosU/DatosU/precio_tierra_quindio/precio_tierra_quindio.shp')
 
-calidad_tierra = gpd.read_file('DatosU\DatosU\calidad_tierra_quindio/calidad_tierra_quindio.shp')
+calidad_tierra = gpd.read_file('DatosU/DatosU/calidad_tierra_quindio/calidad_tierra_quindio.shp')
 
 
 # Asegurarse de que las geometrías sean de tipo MultiPolygon o Polygon
