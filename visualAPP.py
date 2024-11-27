@@ -544,7 +544,7 @@ calidad_tierra = gpd.read_file('DatosU/DatosU/calidad_tierra_quindio/calidad_tie
 # Asegurarse de que las geometrías sean de tipo MultiPolygon o Polygon
 dfData = dfData[dfData['geometry'].apply(lambda x: isinstance(x, (MultiPolygon, Polygon)))]
 
-tab1,tab2,tab3,tab4,tab5=st.tabs(['Chatbot','Inicio','Mapa geográfico','Mapa cultivos','Reforma Agraria'])
+tab1,tab2,tab3,tab4,tab5,tab10=st.tabs(['Chatbot','Inicio','Mapa geográfico','Mapa cultivos','Reforma Agraria','Créditos'])
 
 with tab2:
     dfmapq['LATITUD'] = dfmapq.geometry.centroid.y  # Extraer la latitud de los centroides
@@ -1390,7 +1390,35 @@ with tab1:
     if __name__ == "__main__":
         chat()
     
+with tab10:  # "tab10"
+    st.header("Créditos")
+    
+    # Información de los estudiantes
+    st.subheader("Estudiantes participantes de la maestría en ingeniería de sistemas y computación")
+    estudiantes = [
+        {"nombre": "Paula Andrea Castro", "rol": "Ing. de sistemas y computación", "correo": "paula.castro@utp.edu.co"},
+        {"nombre": "Carlos Fernando Betancur", "rol": "Administrador ambiental", "correo": "cfbetancur@utp.edu.co"},
+        {"nombre": "Mario Alejandro Ortegón", "rol": "Ing. físico", "correo": "maortegon@utp.edu.co"}
+    ]
 
+    # Mostrar información de los estudiantes
+    for estudiante in estudiantes:
+        st.markdown(f"""
+        **Nombre:** {estudiante['nombre']}  
+        **Rol:** {estudiante['rol']}  
+        **Correo:** {estudiante['correo']}
+        """)
+
+    # Información adicional
+    st.subheader("Universidad Tecnológica de Pereira")
+    st.write("Proyecto desarrollado en el marco del concurso de Datos Abiertos promovido por el MinTIC.")
+
+    # Derechos reservados
+    st.markdown("""
+    ---
+    **Derechos Reservados © 2024**  
+    Universidad Tecnológica de Pereira. Todos los derechos reservados.  
+    """)
 
 
 
