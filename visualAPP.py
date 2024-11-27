@@ -22,6 +22,7 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 import base64
+import os
 import plotly.express as px
 from plotly.subplots import make_subplots
 
