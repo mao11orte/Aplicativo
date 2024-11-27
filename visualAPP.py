@@ -576,7 +576,14 @@ with tab2:
         st.write("")  # Espacio en blanco para alineación vertical
         if st.button("Generar informe"):            
             st.write(f"Has seleccionado el municipio de {selected_municipio}")
-            generar_informes(selected_municipio)
+            file_path = generar_informes(selected_municipio)
+            with open(file_path, "rb") as f:
+                st.download_button(
+                    label="Descargar informe",
+                    data=f,
+                    file_name=file_path,
+                    mime="text/plain"
+                )
 # Crear el gráfico de Plotly con los centroides
 with tab3: 
     dfmapq['LATITUD'] = dfmapq.geometry.centroid.y  # Extraer la latitud de los centroides
