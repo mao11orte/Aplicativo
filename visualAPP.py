@@ -5,13 +5,9 @@ import plotly.express as px
 import matplotlib.pyplot as plt
 import json
 from groq import Groq
-from streamlit_folium import st_folium #Widget de Streamlit para mostrar los mapas
-from folium.plugins import MarkerCluster #Plugin para agrupar marcadores
-from folium import Choropleth, GeoJson
 from shapely.geometry import MultiPolygon, Polygon
 import numpy as np
 import plotly.graph_objects as go
-from ipywidgets import RadioButtons, interactive
 import pandas as pd
 import nltk
 from nltk.tokenize import word_tokenize
@@ -25,8 +21,9 @@ from docx.shared import Inches, Pt
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
-import json
 import base64
+import plotly.express as px
+from plotly.subplots import make_subplots
 
 def generar_informes(selected_municipio):
     #importamos los archivos
@@ -491,7 +488,7 @@ def generar_informes(selected_municipio):
 
 st.set_page_config(
     page_title="Departamento del Quindío",
-    page_icon="🌐",  
+    page_icon="DatosU/icon.png",  
     layout='wide',
     initial_sidebar_state="expanded"
 )
@@ -538,9 +535,9 @@ calidad_tierra = gpd.read_file('DatosU\DatosU\calidad_tierra_quindio/calidad_tie
 # Asegurarse de que las geometrías sean de tipo MultiPolygon o Polygon
 dfData = dfData[dfData['geometry'].apply(lambda x: isinstance(x, (MultiPolygon, Polygon)))]
 
-tab1,tab2,tab3,tab4,tab5=st.tabs(['Inicio','Mapa geográfico','Mapa cultivos','Tierras - Reforma Agraria', 'Chatbot'])
+tab1,tab2,tab3,tab4,tab5=st.tabs(['Chatbot','Inicio','Mapa geográfico','Mapa cultivos','Reforma Agraria'])
 
-with tab1:
+with tab2:
     dfmapq['LATITUD'] = dfmapq.geometry.centroid.y  # Extraer la latitud de los centroides
     dfmapq['LONGITUD'] = dfmapq.geometry.centroid.x  # Extraer la longitud de los centroides
 
@@ -575,11 +572,11 @@ with tab1:
     with col2:
         # Agregar un espacio para alinear el botón
         st.write("")  # Espacio en blanco para alineación vertical
-        if st.button("Confirmar"):            
+        if st.button("Generar informe"):            
             st.write(f"Has seleccionado el municipio de {selected_municipio}")
             generar_informes(selected_municipio)
 # Crear el gráfico de Plotly con los centroides
-with tab2: 
+with tab3: 
     dfmapq['LATITUD'] = dfmapq.geometry.centroid.y  # Extraer la latitud de los centroides
     dfmapq['LONGITUD'] = dfmapq.geometry.centroid.x
     
@@ -728,8 +725,63 @@ with tab2:
     
     # Mostrar el gráfico en Streamlit
     st.plotly_chart(fig, use_container_width=True, showlegend=True)
+    
+    # Crear gráficos de barras horizontales
+    # Reorganizar el DataFrame para Estrato, Sexo y Escolaridad
+    df_estrato = df_filtrado.melt(id_vars='MPIO_CNMBR', 
+                                value_vars=['Estrato 1', 'Estrato 2', 'Estrato 3', 'Estrato 4', 'Estrato 5', 'Estrato 6'],
+                                var_name='Estrato', value_name='Porcentaje')
 
-with tab3:
+    df_sexo = df_filtrado.melt(id_vars='MPIO_CNMBR', 
+                            value_vars=['Hombres', 'Mujeres'], 
+                            var_name='Sexo', value_name='Porcentaje')
+
+    df_escolaridad = df_filtrado.melt(id_vars='MPIO_CNMBR', 
+                                    value_vars=['Primaria', 'Secundaria', 'Universitaria', 'Posgrado'], 
+                                    var_name='Escolaridad', value_name='Porcentaje')
+
+    # Graficar Estrato
+    fig_estrato = px.bar(
+        df_estrato,  # DataFrame reorganizado para Estrato
+        y='MPIO_CNMBR',  # Municipios en el eje Y
+        x='Porcentaje',  # Porcentaje en el eje X
+        color='Estrato',  # Colorear las barras por el Estrato
+        orientation='h',  # Barras horizontales
+        title='Distribución por Estrato',
+        labels={'MPIO_CNMBR': 'Municipios', 'Porcentaje': 'Porcentaje (%)'}
+    )
+
+    # Graficar Sexo
+    fig_sexo = px.bar(
+        df_sexo,  # DataFrame reorganizado para Sexo
+        y='MPIO_CNMBR',  # Municipios en el eje Y
+        x='Porcentaje',  # Porcentaje en el eje X
+        color='Sexo',  # Colorear las barras por Sexo
+        orientation='h',  # Barras horizontales
+        title='Distribución por Sexo',
+        labels={'MPIO_CNMBR': 'Municipios', 'Porcentaje': 'Porcentaje (%)'}
+    )
+
+    # Graficar Escolaridad
+    fig_escolaridad = px.bar(
+        df_escolaridad,  # DataFrame reorganizado para Escolaridad
+        y='MPIO_CNMBR',  # Municipios en el eje Y
+        x='Porcentaje',  # Porcentaje en el eje X
+        color='Escolaridad',  # Colorear las barras por Escolaridad
+        orientation='h',  # Barras horizontales
+        title='Distribución por Escolaridad',
+        labels={'MPIO_CNMBR': 'Municipios', 'Porcentaje': 'Porcentaje (%)'}
+    )
+
+    # Mostrar gráficos en Streamlit
+    st.plotly_chart(fig_estrato)
+    st.plotly_chart(fig_sexo)
+    st.plotly_chart(fig_escolaridad)
+    # st.write(df_filtrado.head())  # Muestra las primeras filas del DataFrame para verificar su estructura
+
+        
+
+with tab4:
     # Asegúrate de que 'geometry' sea la columna de coordenadas
     dfAgro = dfAgro.to_crs(epsg=4326)  # Convertir a latitud y longitud si es necesario
     dfmapQ = dfmapQ.to_crs(epsg=4326)
@@ -777,6 +829,7 @@ with tab3:
     radio_var = st.radio("Selecciona un cultivo:", ('Aguacate', 'Banano', 'Café', 'Plátano'),horizontal=True)
 
     # Filtrar los puntos según la selección de la variable
+    color_map = {'Aguacate': 'darkgreen', 'Banano': 'yellow', 'Café': 'brown', 'Plátano': 'green'}
     if radio_var == 'Aguacate':
         selected_points = dfAgro[dfAgro['ap_agaucat'] == 1]
     elif radio_var == 'Banano':
@@ -785,6 +838,9 @@ with tab3:
         selected_points = dfAgro[dfAgro['ac_cafe'] == 1]
     else:
         selected_points = dfAgro[dfAgro['ac_platano'] == 1]
+        
+    # Obtener el color correspondiente
+    selected_color = color_map.get(radio_var, 'gray')
 
     # Agregar los puntos seleccionados al gráfico
     scatter = go.Scattergeo(
@@ -792,7 +848,7 @@ with tab3:
         lat=selected_points.geometry.centroid.y,  # Latitudes de los centroides
         text=selected_points['municipio'],  # Información adicional sobre el punto, como el nombre del municipio
         mode='markers',
-        marker=dict(size=8, color='gray', opacity=0.7),  # Estilo de los puntos
+        marker=dict(size=8, color= selected_color, opacity=0.7),  # Estilo de los puntos
         showlegend=False
     )
 
@@ -805,7 +861,7 @@ with tab3:
     # Mostrar el gráfico en Streamlit
     st.plotly_chart(fig, use_container_width=True)
     
-with tab4:
+with tab5:
     # Asegurarse de que está en EPSG:4326
     precio_tierra = precio_tierra.to_crs("EPSG:4326")
     calidad_tierra = calidad_tierra.to_crs("EPSG:4326")
@@ -822,50 +878,337 @@ with tab4:
     geojson_data_precio = json.loads(precio_tierra.to_json())
     geojson_data_calidad = json.loads(calidad_tierra.to_json())
 
-    # Configurar el mapa de precio
-    fig_precio = px.choropleth_mapbox(
-        precio_tierra,
-        geojson=geojson_data_precio,
-        locations=precio_tierra.index,
-        color="CodPrecio",
-        color_continuous_scale="YlGnBu",
-        mapbox_style="carto-positron",
-        center={"lat": precio_tierra_centroid.y.mean(), "lon": precio_tierra_centroid.x.mean()},
-        zoom=8.5,
-        opacity=0.6,
-        hover_name="rango_prec",
-        hover_data={"CodPrecio": False, "rango_prec": True}
-    )
-    fig_precio.update_traces(hovertemplate="<b>%{hovertext}</b><br>Millones de pesos por hectárea")
-    fig_precio.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+    # 1. Crear el diccionario con el orden personalizado
+    orden_personalizado = {
+        'Mayor a 1 - hasta 2': 1,
+        'Mayor a 3 - hasta 5': 2,
+        'Mayor a 8 - hasta 10': 3,
+        'Mayor a 10 - hasta 15': 4,
+        'Mayor a 15 - hasta 20': 5,
+        'Mayor a 20 - hasta 30': 6,
+        'Mayor a 30 - hasta 40': 7,
+        'Mayor a 40 - hasta 50': 8,
+        'Mayor a 50 - hasta 60': 9,
+        'Mayor a 60 - hasta 70': 10,
+        'Mayor a 70 - hasta 80': 11,
+        'Mayor a 80 - hasta 100': 12,
+        'Mayor a 100 - hasta 120': 13,
+        'Mayor a 120 - hasta 140': 14,
+        'Mayor a 140 - hasta 160': 15,
+        'Mayor a 180 - hasta 200': 16,
+        'Mayor a 550 - hasta 600': 17,
+        'Mayor a 650 - hasta 700': 18
+    }
 
+    # Asignar el orden personalizado a la columna 'rango_prec' en el DataFrame del mapa
+    precio_tierra['orden'] = precio_tierra['rango_prec'].map(orden_personalizado)
+
+    # Función para crear el gráfico de barras
+    def crear_grafico_barras(df):
+        fig = px.bar(
+            data_frame=df,
+            x='hectareas',
+            y='rango_prec',
+            orientation='h',
+            labels={'hectareas': 'Extensión total (ha)', 'rango_prec': 'Rango de precio (millones de pesos por ha)'},
+            color='orden',  # Usar la columna 'orden' para colorear las barras
+            color_continuous_scale="YlGnBu"  # Aseguramos que la escala de colores sea Viridis
+        )
+        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+        fig.update_yaxes(
+            categoryorder='array',
+            categoryarray=df['rango_prec']
+        )
+        fig.update_layout(
+            margin={"l": 200, "r": 10, "t": 10, "b": 10},  # Aumentamos el margen izquierdo
+        )
+        fig.update_yaxes(
+            automargin=True,
+            tickfont=dict(size=10),  # Reducimos el tamaño de la fuente si es necesario
+        )
+        return fig
+
+    # Función para crear el mapa de precios
+    def crear_mapa_precios(df, geojson_data):
+        fig = px.choropleth_mapbox(
+            df,
+            geojson=geojson_data,
+            locations=df.index,
+            color="orden",  # Usar la columna 'orden' para colorear el mapa
+            color_continuous_scale="YlGnBu",
+            mapbox_style="carto-positron",
+            center={"lat": precio_tierra_centroid.y.mean(), "lon": precio_tierra_centroid.x.mean()},
+            zoom=8.5,
+            opacity=0.6,
+            hover_name="rango_prec",
+            hover_data={"orden": False, "rango_prec": True}
+        )
+        fig.update_traces(marker_line_width=0.2)
+        fig.update_traces(hovertemplate="<b>%{hovertext}</b><br>Millones de pesos por hectárea")
+        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+        return fig
+
+    # Agrupar y sumar las hectáreas por rango de precio
+    df_agrupado = precio_tierra.groupby('rango_prec')['hectareas'].sum().reset_index()
+
+    # Asignar el orden a cada categoría en el DataFrame
+    df_agrupado['orden'] = df_agrupado['rango_prec'].map(orden_personalizado)
+
+    # Ordenar el DataFrame según el orden personalizado
+    df_agrupado = df_agrupado.sort_values('orden', ascending=False)
+
+    # Crear los gráficos
+    fig_barra = crear_grafico_barras(df_agrupado)
+    fig_precio = crear_mapa_precios(precio_tierra, geojson_data_precio)
+
+    # Combinar ambos gráficos en un único layout
+    fig = make_subplots(
+        rows=1, cols=2,
+        column_widths=[0.5, 0.5],  
+        specs=[[{"type": "xy"}, {"type": "mapbox"}]]  
+    )
+
+    # Añadir el gráfico de barras al subplot izquierdo
+    for trace in fig_barra.data:
+        fig.add_trace(trace, row=1, col=1)
+
+    # Añadir el mapa al subplot derecho
+    for trace in fig_precio.data:
+        fig.add_trace(trace, row=1, col=2)
+
+    # Actualizar layout general
+    fig.update_layout(
+        mapbox=dict(
+            style="carto-positron",
+            domain={'x': [0.5, 1], 'y': [0, 1]},  
+            center={"lat": precio_tierra_centroid.y.mean(), "lon": precio_tierra_centroid.x.mean()},
+            zoom=8.5
+        ),
+        showlegend=False,
+    )
+
+    # Ajustar los márgenes generales de la figura
+    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+
+    # Mostrar gráfico combinado
+    # fig.show()
+    
     # Configurar el mapa de calidad UFH
-    fig_calidad = px.choropleth_mapbox(
-        calidad_tierra,
-        geojson=geojson_data_calidad,
-        locations=calidad_tierra.index,
-        color="Valor_UFH",
-        color_continuous_scale="YlGn",
-        mapbox_style="carto-positron",
-        center={"lat": calidad_tierra_centroid.y.mean(), "lon": calidad_tierra_centroid.x.mean()},
-        zoom=8.5,
-        opacity=0.6,
-        hover_name="Valor_UFH",
-        hover_data={"Valor_UFH": False}
-    )
-    fig_calidad.update_traces(hovertemplate="<b>%{hovertext}</b><br>Nivel de calidad de la Unidad Física Homogénea (UFH) 1 es la mejor 13 la más restrictiva")
-    fig_calidad.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+    def crear_mapa_calidad(df, geojson_data):
+        fig = px.choropleth_mapbox(
+            df,
+            geojson=geojson_data,
+            locations=df.index,
+            color="Valor_UFH",
+            color_continuous_scale="YlGn",
+            mapbox_style="carto-positron",
+            center={"lat": calidad_tierra_centroid.y.mean(), "lon": calidad_tierra_centroid.x.mean()},
+            zoom=8.5,
+            opacity=0.6,
+            hover_name="Valor_UFH",
+            hover_data={"Valor_UFH": False}
+        )
+        fig.update_traces(marker_line_width=0.2)
+        fig.update_traces(hovertemplate="<b>%{hovertext}</b><br>Nivel de calidad de la Unidad Física Homogénea (UFH) 1 es la mejor 13 la más restrictiva")
+        fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+        return fig
 
-    # Mostrar las gráficas en paralelo
-    col1, col2 = st.columns(2)
+    # Crear gráfico de barras horizontales usando los datos de calidad UFH
+    def crear_grafico_barras_calidad(df):
+        fig = px.bar(
+            data_frame=df,
+            x='hectareas',
+            y='Valor_UFH',
+            orientation='h',
+            labels={'hectareas': 'Extensión total (ha)', 'Valor_UFH': 'Nivel de calidad UFH'},
+            color='Valor_UFH',  
+            color_continuous_scale="YlGn" 
+        )
+        fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+        fig.update_yaxes(
+            categoryorder='array',
+            categoryarray=df['Valor_UFH'],
+        )
+        fig.update_layout(
+            margin={"l": 200, "r": 10, "t": 10, "b": 10}, 
+        )
+        fig.update_yaxes(
+            automargin=True,
+            tickfont=dict(size=10),  
+        )
+        return fig
 
-    with col1:
-        st.plotly_chart(fig_precio, use_container_width=True)
+    # Agrupar y sumar las hectáreas por nivel de calidad UFH
+    df_calidad_agrupado = calidad_tierra.groupby('Valor_UFH')['hectareas'].sum().reset_index()
+
+    # Ordenar el DataFrame por 'Valor_UFH'
+    df_calidad_agrupado = df_calidad_agrupado.sort_values('Valor_UFH')
+
+    # Crear los gráficos
+    fig_barra_calidad = crear_grafico_barras_calidad(df_calidad_agrupado)
+    fig_calidad = crear_mapa_calidad(calidad_tierra, geojson_data_calidad)
+
+    # Combinar ambos gráficos en un único layout
+    # Streamlit Layout
+    # st.title("Visualización de Precio y Calidad de Tierra")
     
-    with col2:
-        st.plotly_chart(fig_calidad, use_container_width=True)
+    tab6, tab7, tab8 = st.tabs(["Precio y calidad de Tierra", "Análisis Territorial", "Validación de resultados"])
+
+    with tab6:
+        col1, col2 = st.columns(2)  # Crear dos columnas        
+        #     # Título en la columna 2
+        #     st.subheader("")            
+           
+        with col1:
+            # Primera fila de gráficos con texto al lado
+            st.plotly_chart(fig_barra, use_container_width=True)
+            st.write("Cantidad de hectáreas por rango de precio.")
+
+            st.plotly_chart(fig_precio, use_container_width=True)
+            st.write("Districución de rangos de precio de la tierra en el departamento del Quindío.")
+            
+            st.write("""
+            <div style="text-align: justify;">
+                Utilizando como fuente el dataset precios comerciales de la tierra rural agropecuaria del portal Datos Abiertos se filtró la información correspondiente al departamento del Quindío en formato Shapefile, el cual contiene la distribución por rangos de precio de la tierra como se observa en la gráfica anterior. Se puede observar que las tierras al sur y al oriente del departamento son las que tienen los menores rangos de precios, por el contrario, las tierras que rodean el centro urbano de Armenia son las más costosas. La zona noroccidental de Quindío presenta tierras con valores medios, esto debido a su cercanía a los centros urbanos, municipios y ciudades de otros departamentos como Pereira y Cartago.
+            </div>
+            """, unsafe_allow_html=True)
+
+        with col2:
+            # Segunda fila de gráficos con texto al lado
+            st.plotly_chart(fig_calidad, use_container_width=True)
+            st.write("Unidades del suelo del Quindío en función de su restricción productiva.")
+
+            st.plotly_chart(fig_barra_calidad, use_container_width=True)
+            st.write("Cantidad de hectáreas por unidad de suelo.")
+            
+            st.write("""
+            <div style="text-align: justify;">
+                Utilizando como fuente el dataset unidades físicas homogéneas en Colombia para el cálculo de la Unidad Agrícola Familiar -UAF- del portal Datos Abiertos se filtró la información correspondiente al departamento del Quindío en formato Shapefile, el cual contiene la distribución por Unidades Físicas Homogéneas (restricción para la productividad en la tierra, siendo 13 la más restrictiva y 1 la menos restrictiva) como se observa en la gráfica anterior. Se evidencia que la zona sur y oriente del Quindío presentan altas restricciones para la productividad, principalmente asociadas a áreas de protección ambiental. Las zonas que presentan una menor restricción en su productividad se encuentran en la zona noroccidental entre municipios de Armenia, Montenegro, Circasia, Filandia y Quimbaya.                
+            </div>
+            """, unsafe_allow_html=True)
+            
+            
+
+    with tab7:
+        # Cargar los datos desde el archivo Excel
+        socioeconomico_quindio = pd.read_excel('DatosU\DatosU\Socioeconomico_Quindio.xlsx')
+
+        # Filtrar los datos para el año 2018 y seleccionar las columnas deseadas
+        datos_2018 = socioeconomico_quindio[socioeconomico_quindio['Año'] == 2018][['Municipio', 'Población Urbana', 'Población Rural']]
+
+        # Calcular los porcentajes
+        datos_2018['Total Población'] = datos_2018['Población Urbana'] + datos_2018['Población Rural']
+        datos_2018['% Población Urbana'] = (datos_2018['Población Urbana'] / datos_2018['Total Población']) * 100
+        datos_2018['% Población Rural'] = (datos_2018['Población Rural'] / datos_2018['Total Población']) * 100
+
+        # Formatear los porcentajes para hover
+        datos_2018['% Población Urbana (hover)'] = datos_2018['% Población Urbana'].map("{:.1f}%".format)
+        datos_2018['% Población Rural (hover)'] = datos_2018['% Población Rural'].map("{:.1f}%".format)
+
+        # Configurar la página en Streamlit
+        st.title("Distribución de población en el Quindío (2018)")
+        st.write("""
+            <div style="text-align: justify;">
+                Del análisis en de los mapas relacionados anterior se observa que las tierras que guardan una mejor relación representada en unas menores restricciones productivas de sus Unidades Físicas Homogéneas y precios de la tierra moderados y accesibles para su compra en cantidades suficientes por parte del Gobierno Nacional son aquellas que se encuentran que al noroccidente en los municipios de Filandia, Circasia, Quimbaya, Montenegro y La Tebaida. Estas deben ser el foco de función de la producción agropecuaria para garantizar seguridad alimentaria y alternativas económicas a las poblaciones rurales del Quindío.
+
+\nSin embargo, las tierras al occidente del Quindío muestran una alta correlación entre sus elevados niveles de restricción, debido a la presencia de áreas protegidas para la conservación ambiental, y su bajo precio por hectárea. A pesar de esto, como se puede observar en las gráficas siguientes, estas no son tierras despobladas; por el contrario, están habitadas por poblaciones establecidas, muchas de ellas en el sector rural, que también requieren el apoyo del Estado.
+            </div>
+            """, unsafe_allow_html=True)
+        
+
+        # Gráfico interactivo para porcentaje de Población Urbana
+        fig_urbana = px.bar(
+            datos_2018,
+            x='% Población Urbana',
+            y='Municipio',
+            orientation='h',  # Gráfico horizontal
+            title='Porcentaje de población urbana en el Quindío (2018)',
+            labels={'% Población Urbana': 'Porcentaje de Población Urbana', 'Municipio': 'Municipios'},
+            color='% Población Urbana',  # Color por cantidad
+            hover_data={'% Población Urbana (hover)': True, 'Municipio': False}  # Mostrar solo el porcentaje con formato en hover
+        )
+        fig_urbana.update_layout(xaxis_title='Porcentaje (%)', yaxis_title='Municipios')
+        st.plotly_chart(fig_urbana, use_container_width=True)
+
+        # Gráfico interactivo para porcentaje de Población Rural
+        fig_rural = px.bar(
+            datos_2018,
+            x='% Población Rural',
+            y='Municipio',
+            orientation='h',  # Gráfico horizontal
+            title='Porcentaje de población rural en el Quindío (2018)',
+            labels={'% Población Rural': 'Porcentaje de Población Rural', 'Municipio': 'Municipios'},
+            color='% Población Rural',  # Color por cantidad
+            hover_data={'% Población Rural (hover)': True, 'Municipio': False}  # Mostrar solo el porcentaje con formato en hover
+        )
+        fig_rural.update_layout(xaxis_title='Porcentaje (%)', yaxis_title='Municipios')
+        st.plotly_chart(fig_rural, use_container_width=True)
+
+        # Gráfico combinado: Porcentajes de Población Urbana y Rural
+        fig_combinado = go.Figure()
+
+        # Agregar Porcentaje de Población Urbana
+        fig_combinado.add_trace(go.Bar(
+            y=datos_2018['Municipio'],
+            x=datos_2018['% Población Urbana'],
+            name='% Población Urbana',
+            orientation='h',
+            marker=dict(color='skyblue'),
+            hovertemplate='%{x:.1f}%'
+        ))
+
+        # Agregar Porcentaje de Población Rural
+        fig_combinado.add_trace(go.Bar(
+            y=datos_2018['Municipio'],
+            x=datos_2018['% Población Rural'],
+            name='% Población Rural',
+            orientation='h',
+            marker=dict(color='cornflowerblue'),
+            hovertemplate='%{x:.1f}%'
+        ))
+
+        # Configurar diseño
+        fig_combinado.update_layout(
+            title='Porcentaje de población urbana y rural en el Quindío (2018)',
+            barmode='stack',  # Barras apiladas
+            xaxis_title='Porcentaje (%)',
+            yaxis_title='Municipios',
+            legend_title='Tipo de Población',
+            height=600
+        )
+
+        # Mostrar gráfico combinado en Streamlit
+        st.plotly_chart(fig_combinado, use_container_width=True)
+        st.write("""
+            <div style="text-align: justify;">
+                En este contexto, el aplicativo se presenta como una herramienta clave para la toma de decisiones de los funcionarios públicos. Gracias a la identificación visual que ofrecen los mapas y al cruce de información entre las zonas de interés ambiental y las áreas con precios de tierras bajos, se facilita la adquisición de predios para la creación de corredores biológicos, zonas de recarga de acuíferos y áreas aferentes a los acueductos comunitarios y municipales, entre otras.
+
+Sin embargo, no es posible comprar todos los predios, ni es viable reubicar a toda la población campesina presente en la zona. Por lo que el aplicativo también se presta como herramienta para la orientar decisiones hacia la promoción de prácticas de producción y consumo sostenible respaldas por entidades como las Alcaldías Municipales y la Corporación Autónoma que garantice la calidad de vida las comunidades rurales en la zona.
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with tab8:
+            st.write("""
+            <div style="text-align: justify;">
+                Los resultados obtenidos a partir de los análisis fueron validados mediante modelos de Machine Learning, específicamente con algoritmos de clasificación como Random Forest y Gradient Boosting, los cuales alcanzaron métricas de accuracy del 75% en la estimación de los precios de la tierra. Esto demuestra que las relaciones entre datos socioeconómicos, agrarios y territoriales constituyen una estrategia efectiva para la toma de decisiones, especialmente en la identificación de tierras con mayor viabilidad para su adquisición a través de la Agencia Nacional de Tierras y otras entidades involucradas en la Reforma Agraria.
+
+Concretamente, los modelos identificaron como las principales variables a considerar en la adquisición de tierras: la ubicación de los municipios, los tipos de suelos, el clima, la profundidad radicular, el perfil de los suelos y las restricciones propias de las Unidades Físicas Homogéneas. Además, este modelo contribuirá a agilizar los procesos de análisis, proporcionando a los funcionarios públicos, técnicos y comunidades un insumo respaldado tanto por estadísticas como por metodologías sólidas, que estará listo para ser reinterpretado y ajustado según las realidades territoriales construidas a partir de los espacios de participación.
+
+El modelo puede ser consultado a través del Jupyter Notebook denominado “modelo_predicción_reforma_agraria” en el repositorio de GitHub del proyecto.
+            """, unsafe_allow_html=True)
+
+        
+        # st.subheader("Calidad de Tierra")
+        # Mostrar gráficos de forma horizontal
+        # col1, col2 = st.columns(2)  # Crear dos columnas
+        # with col1:
+        #     st.write("Aquí se visualizan las barras que combinan calidad y precio para una mejor comparación.")
+            
+        # with col2:
+        #     st.write("Aquí se visualizan las barras que combinan calidad y precio para una mejor comparación.")
+            
     
-with tab5:
+with tab1:
     # Descargar los recursos necesarios de NLTK si no los tienes
     nltk.download('punkt')
 
@@ -940,7 +1283,7 @@ with tab5:
 
     # Función principal del chat
     def chat():
-        st.title("Información departamento del Quindío")
+        # st.title("Información departamento del Quindío")
         st.write("Bienvenido a tu asistente de información de tu departamento.")
 
         if 'messages' not in st.session_state:
@@ -980,7 +1323,7 @@ with tab5:
 
         # Obtener el dataframe desde la sesión
         dataframe = st.session_state.get('dataframe', None)
-
+        
         # Función para enviar el mensaje
         def submit():
             user_input = st.session_state.user_input
@@ -1035,3 +1378,5 @@ with tab5:
 
 
 # streamlit run e:/Datos_U/visualAPP.py este es el comando para iniciar el aplicativo
+#  pip install -r requirements.txt
+
