@@ -1,0 +1,9 @@
+streamlit
+geopandas
+pandas
+plotly
+matplotlib
+shapely
+numpy
+nltk
+python-docx
