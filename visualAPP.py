@@ -1378,3 +1378,5 @@ with tab1:
 
 
 # streamlit run e:/Datos_U/visualAPP.py este es el comando para iniciar el aplicativo
+#  pip install -r requirements.txt
+
