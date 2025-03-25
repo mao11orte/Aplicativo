@@ -1243,7 +1243,7 @@ with tab1:
     # Función para obtener la respuesta de la IA
     def get_ai_response(messages):
         completion = client.chat.completions.create(
-            model="llama-3.1-70b-versatile",
+            model="llama-3.3-70b-versatile",
             messages=messages,
             temperature=0.2,
             max_tokens=512,
